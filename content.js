@@ -9,9 +9,48 @@ const TWITTER_SELECTORS = {
   sidebar: '[data-testid="sidebarColumn"]',
 };
 
+let settings = {
+  blurStories: false,
+  hideTwitterSidebar: true,
+  hideFacebookSidebar: true,
+};
+
+function updateFacebook() {
+  if (settings.hideFacebookSidebar) {
+    hideFacebookSidebar();
+  } else {
+    showFacebookSidebar();
+  }
+  if (settings.blurStories) {
+    blurFacebookStories();
+  } else {
+    unblurFacebookStories();
+  }
+}
+
+function updateTwitter() {
+  if (settings.hideTwitterSidebar) {
+    hideTwitterSidebar();
+  } else {
+    showTwitterSidebar();
+  }
+}
+
 function hideFacebookSidebar() {
   document.querySelectorAll(FACEBOOK_SELECTORS).forEach((el) => {
-    el.style.display = "none";
+    el.style.setProperty("display", "none", "important");
+  });
+}
+
+function showFacebookSidebar() {
+  document.querySelectorAll(FACEBOOK_SELECTORS).forEach((el) => {
+    el.style.setProperty("display", "block", "important");
+  });
+}
+
+function unblurFacebookStories() {
+  document.querySelectorAll(FACEBOOK_STORY_SELECTORS).forEach((el) => {
+    el.style.removeProperty("filter");
   });
 }
 
@@ -22,62 +61,86 @@ function blurFacebookStories() {
 }
 
 function adjustTwitterLayout() {
+  const header = document.querySelector('header[role="banner"]');
+  if (header) {
+    header.style.setProperty("align-items", "center", "important");
+  }
+}
+
+function hideTwitterSidebar() {
   const sidebarColumn = document.querySelector(TWITTER_SELECTORS.sidebar);
   const primaryColumn = document.querySelector(TWITTER_SELECTORS.primary);
 
-  const header = document.querySelector('header[role="banner"]');
-  if (header) {
-    header.style.setProperty("max-width", "80px", "important");
-    header.style.setProperty("align-items", "center", "important");
-  }
-
   if (sidebarColumn) {
-    console.log("sidebar hidden");
     sidebarColumn.style.setProperty("display", "none", "important");
-    sidebarColumn.style.setProperty("width", "0px", "important");
-    sidebarColumn.style.setProperty("max-width", "0px", "important");
   }
 
   if (primaryColumn) {
-    console.log("primary column adjusted");
-    primaryColumn.style.setProperty("width", "700px", "important");
-    primaryColumn.style.setProperty("max-width", "700px", "important");
     primaryColumn.style.setProperty("margin", "0 auto", "important");
+  }
+
+  adjustTwitterLayout();
+}
+
+function showTwitterSidebar() {
+  const sidebarColumn = document.querySelector(TWITTER_SELECTORS.sidebar);
+
+  if (sidebarColumn) {
+    sidebarColumn.style.setProperty("display", "block", "important");
   }
 }
 
 function init() {
-  try {
-    const isX = location.hostname.includes("x.com");
-    const isTwitter = location.hostname.includes("twitter.com");
-    const isFacebook = location.hostname.includes("facebook.com");
+  chrome.storage.local.get(
+    ["blurStories", "hideTwitterSidebar", "hideFacebookSidebar"],
+    (result) => {
+      if (result.blurStories !== undefined)
+        settings.blurStories = result.blurStories;
+      if (result.hideTwitterSidebar !== undefined)
+        settings.hideTwitterSidebar = result.hideTwitterSidebar;
+      if (result.hideFacebookSidebar !== undefined)
+        settings.hideFacebookSidebar = result.hideFacebookSidebar;
 
-    if (isFacebook) {
-      hideFacebookSidebar();
+      try {
+        const isX = location.hostname.includes("x.com");
+        const isTwitter = location.hostname.includes("twitter.com");
+        const isFacebook = location.hostname.includes("facebook.com");
 
-      // Observer solo para Facebook
-      const fbObserver = new MutationObserver(() => {
-        hideFacebookSidebar();
-      });
-      fbObserver.observe(document.body, { childList: true, subtree: true });
-    }
+        if (isFacebook) {
+          updateFacebook();
+          const fbObserver = new MutationObserver(() => updateFacebook());
+          fbObserver.observe(document.body, { childList: true, subtree: true });
+        }
 
-    if (isTwitter || isX) {
-      adjustTwitterLayout();
-
-      // Observer para Twitter con ambos selectores
-      const twitterObserver = new MutationObserver(() => {
-        adjustTwitterLayout();
-      });
-      twitterObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-      });
-    }
-  } catch (e) {
-    console.error("sections-remover content script error:", e);
-  }
+        if (isTwitter || isX) {
+          updateTwitter();
+          const twitterObserver = new MutationObserver(() => updateTwitter());
+          twitterObserver.observe(document.body, {
+            childList: true,
+            subtree: true,
+          });
+        }
+      } catch (e) {
+        console.error("sections-remover content script error:", e);
+      }
+    },
+  );
 }
+
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.blurStories) settings.blurStories = changes.blurStories.newValue;
+  if (changes.hideTwitterSidebar)
+    settings.hideTwitterSidebar = changes.hideTwitterSidebar.newValue;
+  if (changes.hideFacebookSidebar)
+    settings.hideFacebookSidebar = changes.hideFacebookSidebar.newValue;
+
+  const isX = location.hostname.includes("x.com");
+  const isTwitter = location.hostname.includes("twitter.com");
+  const isFacebook = location.hostname.includes("facebook.com");
+
+  if (isFacebook) updateFacebook();
+  if (isTwitter || isX) updateTwitter();
+});
 
 if (document.body) {
   init();

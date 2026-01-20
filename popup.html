@@ -3,14 +3,35 @@
 
 <body style="width:350px; padding:1em; background-color:#f0f0f0; font-family:Arial, sans-serif;">
   <div style="display: flex; flex-direction: column;">
-    <h3>Secction hidder</h3>
-    <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem;">
-      <input id="selector-input" placeholder="[role='roleName', class='class list', id='id-elem']">
-      <button id="hide-now-btn" class="">Hide now</button>
+    <!-- Universal Section Hidder -->
+    <div>
+      <h3>Universal Section Hidder</h3>
+      <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
+        <input id="selector-input" placeholder="[role='roleName', class='class list', id='id-elem']">
+        <button id="hide-now-btn" class="">Hide now</button>
+      </div>
     </div>
-    <div style="display: flex; flex-direction: row; gap: 1rem; align-items: center;">
-      <input type="checkbox" id="blur-stories-checkbox">
-      <label for="blur-stories-checkbox">Blur stories</label>
+
+    <!-- Facebook -->
+    <div>
+      <h3>Facebook</h3>
+      <div style="display: flex; flex-direction: row; gap: 5px; align-items: center;">
+        <input type="checkbox" id="blur-stories-checkbox">
+        <label for="blur-stories-checkbox">Blur stories</label>
+      </div>
+      <div style="display: flex; flex-direction: row; gap: 5px; align-items: center;">
+        <input type="checkbox" id="hide-facebook-sidebar-checkbox" checked>
+        <label for="hide-facebook-sidebar-checkbox">Hide sidebar</label>
+      </div>
+    </div>
+
+    <!-- X/Twitter -->
+    <div>
+      <h3>X/Twitter</h3>
+      <div style="display: flex; flex-direction: row; gap: 5px; align-items: center;">
+        <input type="checkbox" id="hide-twitter-sidebar-checkbox" checked>
+        <label for="hide-twitter-sidebar-checkbox">Hide sidebar</label>
+      </div>
     </div>
     <!-- <button id="save-btn">Save forever</button> -->
   </div>

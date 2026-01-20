@@ -16,22 +16,47 @@ document.getElementById("hide-now-btn").addEventListener("click", () => {
 });
 
 const blurStoriesCheckbox = document.getElementById("blur-stories-checkbox");
+const hideFacebookSidebarCheckbox = document.getElementById(
+  "hide-facebook-sidebar-checkbox",
+);
+const hideTwitterSidebarCheckbox = document.getElementById(
+  "hide-twitter-sidebar-checkbox",
+);
+
+// Load initial states
+chrome.storage.local.get(
+  ["blurStories", "hideTwitterSidebar", "hideFacebookSidebar"],
+  (result) => {
+    // Blur stories: por defecto desmarcado (false)
+    blurStoriesCheckbox.checked =
+      result.blurStories !== undefined ? result.blurStories : false;
+
+    // Facebook sidebar: por defecto marcado (true)
+    hideFacebookSidebarCheckbox.checked =
+      result.hideFacebookSidebar !== undefined
+        ? result.hideFacebookSidebar
+        : true;
+
+    // Twitter sidebar: por defecto marcado (true)
+    hideTwitterSidebarCheckbox.checked =
+      result.hideTwitterSidebar !== undefined
+        ? result.hideTwitterSidebar
+        : true;
+  },
+);
 
 blurStoriesCheckbox.addEventListener("change", () => {
-  const blurStories = blurStoriesCheckbox.checked;
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.scripting.executeScript({
-      target: { tabId: tabs[0].id },
-      func: (blur) => {
-        document.querySelectorAll(FACEBOOK_STORY_SELECTORS).forEach((el) => {
-          if (blur) {
-            el.style.setProperty("filter", "blur(3px)", "important");
-          } else {
-            el.style.removeProperty("filter");
-          }
-        });
-      },
-      args: [blurStories],
-    });
+  chrome.storage.local.set({ blurStories: blurStoriesCheckbox.checked });
+});
+
+hideFacebookSidebarCheckbox.addEventListener("change", () => {
+  chrome.storage.local.set({
+    hideFacebookSidebar: hideFacebookSidebarCheckbox.checked,
+  });
+});
+
+hideTwitterSidebarCheckbox.addEventListener("change", () => {
+  chrome.storage.local.set({
+    hideTwitterSidebar: hideTwitterSidebarCheckbox.checked,
   });
 });
