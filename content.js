@@ -2,42 +2,22 @@
 
 // Selectores separados por sitio
 const FACEBOOK_SELECTORS = "[role*='complementary']";
-const FACEBOOK_STORY_SELECTORS = '[data-type="hscroll-child"][role="gridcell"]';
+const FACEBOOK_STORY_SELECTORS =
+  "[data-type*='hscroll-child'][role='gridcell']";
 const TWITTER_SELECTORS = {
   primary: '[data-testid="primaryColumn"]',
   sidebar: '[data-testid="sidebarColumn"]',
 };
 
-const NUCLEAR_STYLE_ID = "fb-hider-nuclear-css";
-
-function injectNuclearStyles() {
-  if (document.getElementById(NUCLEAR_STYLE_ID)) return;
-  const style = document.createElement("style");
-  style.id = NUCLEAR_STYLE_ID;
-  style.textContent = `
-    /* Nuclear Blur Selectors - Persistent CSS */
-    [data-type="hscroll-child"][role="gridcell"],
-    [aria-label*="Stories" i] [role="gridcell"],
-    [aria-label*="Historias" i] [role="gridcell"],
-    [aria-label*="Bandeja de historias" i] [role="gridcell"],
-    [aria-label*="Stories tray" i] [role="gridcell"],
-    a[href^="/stories/create/"] {
-      filter: blur(20px) !important;
-      opacity: 0.4 !important;
-      pointer-events: none !important;
-      transition: filter 0.3s ease !important;
-    }
-  `;
-  (document.head || document.documentElement).appendChild(style);
-}
-
-function hideFacebookElements() {
-  // Aplicar estilos nucleares
-  injectNuclearStyles();
-
-  // Ocultar elementos complementarios (sidebar)
+function hideFacebookSidebar() {
   document.querySelectorAll(FACEBOOK_SELECTORS).forEach((el) => {
     el.style.display = "none";
+  });
+}
+
+function blurFacebookStories() {
+  document.querySelectorAll(FACEBOOK_STORY_SELECTORS).forEach((el) => {
+    el.style.setProperty("filter", "blur(3px)", "important");
   });
 }
 
@@ -73,11 +53,11 @@ function init() {
     const isFacebook = location.hostname.includes("facebook.com");
 
     if (isFacebook) {
-      hideFacebookElements();
+      hideFacebookSidebar();
 
       // Observer solo para Facebook
       const fbObserver = new MutationObserver(() => {
-        hideFacebookElements();
+        hideFacebookSidebar();
       });
       fbObserver.observe(document.body, { childList: true, subtree: true });
     }
