@@ -77,6 +77,8 @@ function hideTwitterSidebar() {
 
   if (primaryColumn) {
     primaryColumn.style.setProperty("margin", "0 auto", "important");
+    primaryColumn.style.setProperty("width", "100%", "important");
+    primaryColumn.style.setProperty("max-width", "700px", "important");
   }
 
   adjustTwitterLayout();
@@ -84,9 +86,16 @@ function hideTwitterSidebar() {
 
 function showTwitterSidebar() {
   const sidebarColumn = document.querySelector(TWITTER_SELECTORS.sidebar);
+  const primaryColumn = document.querySelector(TWITTER_SELECTORS.primary);
 
   if (sidebarColumn) {
     sidebarColumn.style.setProperty("display", "block", "important");
+  }
+
+  if (primaryColumn) {
+    //primaryColumn.style.removeProperty("margin");
+    primaryColumn.style.removeProperty("width");
+    primaryColumn.style.removeProperty("max-width");
   }
 }
 
